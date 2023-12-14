@@ -1,6 +1,8 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/api/contents', methods=['GET'])
 def contents():
@@ -9,4 +11,4 @@ def contents():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8080)
