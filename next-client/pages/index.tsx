@@ -4,6 +4,7 @@
 // The API is fetched on the client side.
 
 import React, { useEffect, useState } from 'react'
+import axiosInstance from '../utils/axios'
 
 /**
  * Renders the test_api page component.
@@ -11,18 +12,18 @@ import React, { useEffect, useState } from 'react'
  */
 function test_api() {
 
-  const [message, setMessage] = useState<string>("Loading...");
+  const [data, setData] = useState<string>("Loading...");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8080/api/test").then(
-      res => res.json()
+    axiosInstance.get("health").then(
+      res => res.data
     ).then((data) => {
-        setMessage(data.message);
+        setData(data.data);
   });
   }, []);
 
   return (
-    <div>{ message }</div>
+    <div>{ data }</div>
   )
 }
 
