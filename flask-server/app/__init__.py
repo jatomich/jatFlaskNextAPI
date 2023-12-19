@@ -3,7 +3,7 @@
 
 from flask import Flask
 from config.custom_config import Config
-from app.models import db
+from app.models import db, check_or_load_data
 
 
 def create_app(config_class: Config = Config):
@@ -16,7 +16,6 @@ def create_app(config_class: Config = Config):
 
     with app.app_context():
         from . import routes
-        db.create_all()
-
+        check_or_load_data()
 
     return app
