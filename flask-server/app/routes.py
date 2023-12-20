@@ -36,6 +36,12 @@ def clean_netflix_data(df: pd.DataFrame):
     # Drop the 'duration' column
     df = df.drop(columns=['duration'])
 
+    # Drop duplicate rows
+    df = df.drop_duplicates()
+
+    # Sort the dataframe by 'type' and 'title' and reset the index
+    df = df.sort_values(by=['type', 'title']).reset_index(drop=True)
+
     # Return the dataframe
     return df
 
