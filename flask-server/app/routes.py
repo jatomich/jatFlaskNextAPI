@@ -1,7 +1,6 @@
 from flask import jsonify, url_for, current_app as app
 import pandas as pd
-from enum import Enum
-from .models import db, NetflixContent
+from .models import db
 
 def clean_netflix_data(df: pd.DataFrame):
     """
@@ -16,6 +15,26 @@ def clean_netflix_data(df: pd.DataFrame):
     
     # Remove 's' character from start of 'show_id' column and convert to integer
     df['show_id'] = df['show_id'].str[1:].astype(int)
+
+    # Convert 'date_added' column to datetime format
+    df['date_added'] = pd.to_datetime(df['date_added'])
+
+    # Create new columns for the year, the month and the day the content was added
+    df['year_added'] = df['date_added'].dt.year.astype(int)
+    df['month_added'] = df['date_added'].dt.month_name()
+    df['day_added'] = df['date_added'].dt.day_name()
+
+    # Drop the 'date_added' column
+    df = df.drop(columns=['date_added'])
+
+    # Create new integer column for the runtime of the content
+    df['runtime'] = df['duration'].str.split(' ').str[0].astype(int)
+
+    # Create new string column for the time denomination of the content
+    df['time_denomination'] = df['duration'].str.split(' ').str[1]
+
+    # Drop the 'duration' column
+    df = df.drop(columns=['duration'])
 
     # Return the dataframe
     return df

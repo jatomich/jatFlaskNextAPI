@@ -1,7 +1,6 @@
 import os
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 from flask import current_app as app
@@ -44,12 +43,16 @@ class NetflixContent(Base, db.Model):
     director = db.Column(db.String(100))
     cast = db.Column(db.String(100))
     country = db.Column(db.String(100))
-    date_added = db.Column(db.String(100))
+    date_added = db.Column(db.DateTime(100))
     release_year = db.Column(db.Integer)
     rating = db.Column(db.String(10))
-    duration = db.Column(db.String(10))
+    runtime = db.Column(db.Integer)
+    time_denomination = db.Column(db.String(10))
     listed_in = db.Column(db.String(100))
     description = db.Column(db.Text)
+    year_added = db.Column(db.Integer)
+    month_added = db.Column(db.String(10))
+    day_added = db.Column(db.String(10))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -65,9 +68,13 @@ class NetflixContent(Base, db.Model):
                  date_added=date_added, 
                  release_year=release_year,
                  rating=rating,
-                 duration=duration,
+                 runtime=runtime,
+                 time_denomination=time_denomination,
                  listed_in=listed_in,
-                 description=description):
+                 description=description,
+                 year_added=year_added,
+                 month_added=month_added,
+                 day_added=day_added):
         self.id = id
         self.show_id = show_id
         self.type = type
@@ -78,9 +85,13 @@ class NetflixContent(Base, db.Model):
         self.date_added = date_added
         self.release_year = release_year
         self.rating = rating
-        self.duration = duration
+        self.runtime = runtime
+        self.time_denomination = time_denomination
         self.listed_in = listed_in
         self.description = description
+        self.year_added = year_added
+        self.month_added = month_added
+        self.day_added = day_added
         self.tablename = tablename
 
     def __repr__(self):
