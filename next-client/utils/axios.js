@@ -7,8 +7,8 @@ import axios from 'axios';
  * @type {import("axios").AxiosInstance}
  */
 const axiosInstance = axios.create({
-    baseURL: 'http://127.0.0.1:8080/api/',   // Base URL of the API server
-    timeout: 5000,                      // Timeout of 5 seconds
+    baseURL: 'http://127.0.0.1:8080',   // Base URL of the API server
+    timeout: 20000,                      // Timeout of 20 seconds
     headers: {                          // Headers
         'Content-Type': 'application/json',
         'Accept': 'application/json'

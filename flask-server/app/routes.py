@@ -102,7 +102,7 @@ def health_check():
 #         'data': [i.to_dict() for i in netflix_content]
 #     })
 
-@app.route('/api', methods=['GET'])
+@app.route('/netflix', methods=['GET'])
 def load_database():
     """
     Loads the Netflix content data from a CSV file into the database.
