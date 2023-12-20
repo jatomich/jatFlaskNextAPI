@@ -1,30 +1,24 @@
-// Description: This page displays the contents of the API.
-// Author: Andrew Tomich
+import React from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
 
-// The API is fetched on the client side.
-
-import React, { useEffect, useState } from 'react'
-import axiosInstance from '../utils/axios'
-
-/**
- * Renders the test_api page component.
- * Fetches data from the API and displays a loading message until the data is fetched.
- */
-function test_api() {
-
-  const [data, setData] = useState<string>("Loading...");
-
-  useEffect(() => {
-    axiosInstance.get("health").then(
-      res => res.data
-    ).then((data) => {
-        setData(data.data);
-  });
-  }, []);
-
+const Home: React.FC = () => {
   return (
-    <div>{ data }</div>
-  )
-}
+    <div>
+      <Head>
+        <title>Home Page</title>
+        <meta name="description" content="Welcome to the home page" />
+      </Head>
 
-export default test_api
+      <h1>Welcome to the Home Page</h1>
+
+      <p>This is a simple Next.js application.</p>
+
+      <Link href="/netflix">
+        <p>Go to Netflix page</p>
+      </Link>
+    </div>
+  );
+};
+
+export default Home;
