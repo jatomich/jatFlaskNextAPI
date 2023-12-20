@@ -1,3 +1,6 @@
+# Description: This file contains the models for the tables in the database.
+# Author: Andrew Tomich
+
 import os
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
