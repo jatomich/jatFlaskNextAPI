@@ -2,11 +2,11 @@
 # Author: Andrew Tomich
 
 from flask import Flask
-from config.custom_config import Config
 from app.models import db, check_or_load_data
+from config import Config
 
 
-def create_app(config_class: Config = Config):
+def create_app(config_class=Config):
     app = Flask(__name__,
                 static_url_path='/home/at/Documents/CODE/jatFlaskNextAPI/flask-server/app/static',
                 static_folder='/app/static',

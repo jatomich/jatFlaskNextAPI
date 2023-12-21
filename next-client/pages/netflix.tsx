@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axios";
 
+import Container from "react-bootstrap/Container";
+import Card from "react-bootstrap/Card";
+
 /**
  * Renders the api page component.
  * Fetches data from the API and displays a loading message until the data is fetched.
@@ -24,10 +27,14 @@ function Netflix() {
     <div>
       <h1>Netflix</h1>
       {data && data.map((item, index) => (
-        <div key={index}>
-          <h2>{item.title}</h2>
-          <p>{item.description}</p>
-        </div>
+        <Container key={index}>
+		<Card>
+			<Card.Body>
+				<Card.Title>{item.title}</Card.Title>
+				<Card.Text>{item.description}</Card.Text>
+			</Card.Body>
+		</Card>
+        </Container>
       )
       )}
     </div>
