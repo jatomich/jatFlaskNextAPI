@@ -1,3 +1,6 @@
+# Description: The view functions (along with any helper functions) for the Flask server.
+# Author: Andrew Tomich
+
 from flask import jsonify, url_for, current_app as app
 import pandas as pd
 from .models import db

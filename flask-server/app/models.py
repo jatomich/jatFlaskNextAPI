@@ -4,8 +4,10 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 from flask import current_app as app
-import sqlite3
 from sqlalchemy import MetaData
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+import sqlite3
 
 db = SQLAlchemy()
 
@@ -154,33 +156,51 @@ def read_data_from_csv(filename):
     data = pd.read_csv(file_path)
     return data.to_dict('records')
 
+def insert_row_to_sqlite(row, database_name, table_name):
+    """
+    Inserts a single row into a SQLite database.
+    Args:
+        row (dict): The row to be inserted.
+        database_name (str): The name of the SQLite database.
+        table_name (str): The name of the table.
+    """
+    try:
+        # Connect to the SQLite database
+        with sqlite3.connect(database_name) as conn:
+            # Create a cursor
+            cursor = conn.cursor()
+            # Create the SQL query
+            placeholders = ', '.join(['?'] * len(row))
+            columns = ', '.join(row.keys())
+            sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+            # Execute the SQL query
+            cursor.execute(sql, list(row.values()))
+            # Commit the changes
+            conn.commit()
+    except Exception as e:
+        print(f"Error inserting row into SQLite database: {e}")
+
 def load_dataframe_to_sqlite(dataframe, database_name, table_name):
     """
     Loads a pandas DataFrame into a SQLite database.
-
     Args:
         dataframe (pandas.DataFrame or list): The DataFrame or list to be loaded.
         database_name (str): The name of the SQLite database.
         table_name (str): The name of the table to be created.
-
     Returns:
         bool: True if the DataFrame is successfully loaded, False otherwise.
     """
     try:
-        # Connect to the SQLite database
-        conn = sqlite3.connect(database_name)
-
         # Convert list to DataFrame if necessary
         if isinstance(dataframe, list):
             dataframe = pd.DataFrame(dataframe)
-
-        # Load the DataFrame into the database
-        dataframe.to_sql(table_name, conn, if_exists='replace', index=False)
-
-        # Commit the changes and close the connection
-        conn.commit()
-        conn.close()
-
+        # Convert the DataFrame to a list of dicts
+        data = dataframe.to_dict('records')
+        # Create a ThreadPoolExecutor
+        with ThreadPoolExecutor() as executor:
+            # Use the executor to insert the rows in parallel
+            for row in data:
+                executor.submit(insert_row_to_sqlite, row, database_name, table_name)
         return True
     except Exception as e:
         print(f"Error loading DataFrame to SQLite database: {e}")
@@ -226,18 +246,8 @@ def drop_tables():
 
 def check_or_load_data():
     # Check if the database file exists
-    if not os.path.exists('app.db'):
-        # Load data from 'netflix_ss.csv' file
-        data = read_data_from_csv('netflix_ss.csv')
-        
-        # Create the database and tables
-        with app.app_context():
-            db.create_all()
-        
-        # Insert data into the database
-        load_dataframe_to_sqlite(data, 'app.db', 'netflix_content')
-    else:
-        # Check if the tables are properly formatted
+    if os.path.exists('app.db'):
+        # Make sure the tables are properly formatted
         if not are_tables_formatted():
             # Drop existing tables
             drop_tables()
@@ -246,11 +256,18 @@ def check_or_load_data():
             with app.app_context():
                 db.create_all()
             
-            # Load data from 'netflix_ss.csv' file
+            # Read data from 'netflix_ss.csv' file
             data = read_data_from_csv('netflix_ss.csv')
             
             # Insert data into the database
-            load_dataframe_to_sqlite(data, 'app.db', 'netflix_content')
+            asyncio.run(load_dataframe_to_sqlite(data, 'app.db', 'netflix_content'))
+    else: 
+        # Read data from 'netflix_ss.csv' file
+        data = read_data_from_csv('netflix_ss.csv')
+        # Create the database and tables
+        with app.app_context():
+            db.create_all()
         
-
-
+        # Insert data into the database
+        asyncio.run(load_dataframe_to_sqlite(data, 'app.db', 'netflix_content'))
+        
