@@ -1,3 +1,6 @@
+# Description: Configuration file for Flask app
+# Author: Andrew Tomich
+
 import os
 
 basedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')

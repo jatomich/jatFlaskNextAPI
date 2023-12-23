@@ -1,3 +1,7 @@
+/* Description: This page will fetch data from the API endpoint '/netflix'
+and display it on the page.*/
+// Author: Andrew Tomich
+
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axios";
 
@@ -15,11 +19,16 @@ function Netflix() {
   const [data, setData] = useState<NetflixContent[]>([]);
 
   useEffect(() => {
-    axiosInstance.get("/netflix").then(
-      res => res.data
-    ).then((data) => {
-        setData(data.data);
-  });
+    const fetchData = async () => {
+      try{
+        const res = await axiosInstance.get("/netflix");
+        setData(res.data.data);
+       } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
@@ -28,12 +37,12 @@ function Netflix() {
       <h1>Netflix</h1>
       {data && data.map((item, index) => (
         <Container key={index}>
-		<Card>
-			<Card.Body>
-				<Card.Title>{item.title}</Card.Title>
-				<Card.Text>{item.description}</Card.Text>
-			</Card.Body>
-		</Card>
+          <Card>
+            <Card.Body>
+              <Card.Title>{item.title}</Card.Title>
+              <Card.Text>{item.description}</Card.Text>
+            </Card.Body>
+          </Card>
         </Container>
       )
       )}
