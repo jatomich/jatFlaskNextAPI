@@ -1,21 +1,15 @@
 import os
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+from flask import current_app as app
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
-from flask import current_app as app
-from sqlalchemy import MetaData
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
-import sqlite3
 
 db = SQLAlchemy()
 
-Base = declarative_base()
-
+        
 
 # This class is used to define the NetflixContent table in the database.
-class NetflixContent(Base, db.Model):
+class NetflixContent(db.Model):
     """
     Represents a Netflix content item.
 
@@ -27,10 +21,10 @@ class NetflixContent(Base, db.Model):
         director (str): The director of the content.
         cast (str): The cast members of the content.
         country (str): The country where the content was produced.
-        date_added (str): The date when the content was added to Netflix.
         release_year (int): The release year of the content.
         rating (str): The rating of the content.
-        duration (str): The duration of the content.
+        runtime (int): The runtime of the content.
+        time_denomination (str): The time denomination of the content (e.g., min, season).
         listed_in (str): The categories in which the content is listed.
         description (str): The description of the content.
         created_at (datetime): The timestamp when the content was created.
@@ -45,7 +39,6 @@ class NetflixContent(Base, db.Model):
     director = db.Column(db.String(100))
     cast = db.Column(db.String(100))
     country = db.Column(db.String(100))
-    date_added = db.Column(db.DateTime(100))
     release_year = db.Column(db.Integer)
     rating = db.Column(db.String(10))
     runtime = db.Column(db.Integer)
@@ -58,216 +51,209 @@ class NetflixContent(Base, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self,
-                 tablename=__tablename__,
-                 id=id,
-                 show_id=show_id,
-                 type=type,
-                 title=title,
-                 director=director,
-                 cast=cast,
-                 country=country,
-                 date_added=date_added, 
-                 release_year=release_year,
-                 rating=rating,
-                 runtime=runtime,
-                 time_denomination=time_denomination,
-                 listed_in=listed_in,
-                 description=description,
-                 year_added=year_added,
-                 month_added=month_added,
-                 day_added=day_added):
-        self.id = id
-        self.show_id = show_id
-        self.type = type
-        self.title = title
-        self.director = director
-        self.cast = cast
-        self.country = country
-        self.date_added = date_added
-        self.release_year = release_year
-        self.rating = rating
-        self.runtime = runtime
-        self.time_denomination = time_denomination
-        self.listed_in = listed_in
-        self.description = description
-        self.year_added = year_added
-        self.month_added = month_added
-        self.day_added = day_added
-        self.tablename = tablename
-
     def __repr__(self):
         return '<NetflixContent {}>'.format(self.title)
     
-    def query_all(self):
-        """
-        Retrieves all NetflixContent objects from the database.
 
+
+        
+# This class defines a wrapper for the ORM model classes which provides a set of methods to interact with the database.
+class DataManager:
+
+    def __init__(self,
+        tables=[NetflixContent],
+        filename: str="/home/at/Documents/CODE/jatFlaskNextAPI/flask-server/app/static/netflix_ss.csv"):
+        """
+        Initializes the DataManager class.
+        """
+        self.tables = tables
+        self.filename = filename
+        self.loader = self.select_loader(filename)
+
+    def read_data_from_csv(self):
+        file_path = os.path.join(app.root_path, 'static', self.filename)
+        data = pd.read_csv(file_path)
+        return data.to_dict('records')
+
+    def select_loader(self, filename: str):
+        """
+        Selects the loader function based on the filename.
+        Args:
+            filename (str): The name of the file.
         Returns:
-            list: A list of NetflixContent objects.
+            function: The loader function.
         """
-        return self.query
-    
-    # def to_dict(self):
-    #     """
-    #     Converts the NetflixContent object to a dictionary.
+        if filename and filename is not None:
+            if filename == "/home/at/Documents/CODE/jatFlaskNextAPI/flask-server/app/static/netflix_ss.csv":
+                return self.load_netflix_data
+            else:
+                raise ValueError(f"Invalid filename: {filename}")
 
-    #     Returns:
-    #         dict: A dictionary representation of the NetflixContent object.
-    #     """
-    #     return {
-    #         'id': self.id,
-    #         'show_id': self.show_id,
-    #         'type': self.type,
-    #         'title': self.title,
-    #         'director': self.director,
-    #         'cast': self.cast,
-    #         'country': self.country,
-    #         'date_added': self.date_added,
-    #         'release_year': self.release_year,
-    #         'rating': self.rating,
-    #         'duration': self.duration,
-    #         'listed_in': self.listed_in,
-    #         'description': self.description,
-    #         'created_at': self.created_at,
-    #         'updated_at': self.updated_at
-    #     }
-    
-    # def to_json(self):
-    #     """
-    #     Converts the NetflixContent object to a JSON response.
+    # This function is used to read data from a CSV file.
+    def clean_netflix_data(self, df: pd.DataFrame):
+        """
+        Cleans the Netflix dataframe.
+        Args:
+            df (pandas.DataFrame): The Netflix dataframe.
+        Returns:
+            pandas.DataFrame: The cleaned Netflix dataframe.
+        """
+        # Drop all 'NaN' values, sort the dataframe by title and reset the index
+        df = df.dropna().sort_values(by='title').reset_index(drop=True)
+        
+        # Remove 's' character from start of 'show_id' column and convert to integer
+        df['show_id'] = df['show_id'].str[1:].astype(int)
 
-    #     Returns:
-    #         Response: A JSON response containing the NetflixContent object.
-    #     """
-    #     return jsonify(self.to_dict())
+        # Convert 'date_added' column to datetime format
+        df['date_added'] = pd.to_datetime(df['date_added'])
 
-    # def to_json_list(self):
-    #     """
-    #     Converts a list of NetflixContent objects to a JSON response.
+        # Create new columns for the year, the month and the day the content was added
+        df['year_added'] = df['date_added'].dt.year.astype(int)
+        df['month_added'] = df['date_added'].dt.month_name()
+        df['day_added'] = df['date_added'].dt.day_name()
 
-    #     Returns:
-    #         Response: A JSON response containing a list of NetflixContent objects.
-    #     """
-    #     return jsonify([i.to_dict() for i in self])
+        # Drop the 'date_added' column
+        df = df.drop(columns=['date_added'])
 
-def read_data_from_csv(filename):
-    file_path = os.path.join(app.root_path, 'static', filename)
-    data = pd.read_csv(file_path)
-    return data.to_dict('records')
+        # Create new integer column for the runtime of the content
+        df['runtime'] = df['duration'].str.split(' ').str[0].astype(int)
+        # Create new string column for the time denomination of the content
+        df['time_denomination'] = df['duration'].str.split(' ').str[1]
+        # Drop the 'duration' column
+        df = df.drop(columns=['duration'])
+        # Drop duplicate rows
+        df = df.drop_duplicates()
+        # Sort the dataframe by 'type' and 'title' and reset the index
+        df = df.sort_values(by=['type', 'title']).reset_index(drop=True)
 
-def insert_row_to_sqlite(row, database_name, table_name):
-    """
-    Inserts a single row into a SQLite database.
-    Args:
-        row (dict): The row to be inserted.
-        database_name (str): The name of the SQLite database.
-        table_name (str): The name of the table.
-    """
-    try:
-        # Connect to the SQLite database
-        with sqlite3.connect(database_name) as conn:
-            # Create a cursor
-            cursor = conn.cursor()
-            # Create the SQL query
-            placeholders = ', '.join(['?'] * len(row))
-            columns = ', '.join(row.keys())
-            sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
-            # Execute the SQL query
-            cursor.execute(sql, list(row.values()))
-            # Commit the changes
-            conn.commit()
-    except Exception as e:
-        print(f"Error inserting row into SQLite database: {e}")
+        # Return the dataframe
+        return df
 
-def load_dataframe_to_sqlite(dataframe, database_name, table_name):
-    """
-    Loads a pandas DataFrame into a SQLite database.
-    Args:
-        dataframe (pandas.DataFrame or list): The DataFrame or list to be loaded.
-        database_name (str): The name of the SQLite database.
-        table_name (str): The name of the table to be created.
-    Returns:
-        bool: True if the DataFrame is successfully loaded, False otherwise.
-    """
-    try:
-        # Convert list to DataFrame if necessary
-        if isinstance(dataframe, list):
-            dataframe = pd.DataFrame(dataframe)
-        # Convert the DataFrame to a list of dicts
-        data = dataframe.to_dict('records')
-        # Create a ThreadPoolExecutor
-        with ThreadPoolExecutor() as executor:
-            # Use the executor to insert the rows in parallel
-            for row in data:
-                executor.submit(insert_row_to_sqlite, row, database_name, table_name)
-        return True
-    except Exception as e:
-        print(f"Error loading DataFrame to SQLite database: {e}")
-        return False
-
-def are_tables_formatted():
-    """
-    Checks if the tables are properly formatted.
-
-    Returns:
-        bool: True if the tables are properly formatted, False otherwise.
-    """
-    try:
-        # Get the table names from the database
-        meta = MetaData()
-        meta.reflect(bind=db.engine)
-        table_names = [table.name for table in meta.tables.values()]
-
-        # Check if the table names match the class names
-        if set(table_names) == set([NetflixContent.__tablename__]):
-            return True
-        else:
-            return False
-    except Exception as e:
-        print(f"Error checking table formatting: {e}")
-        return False
-    
-def drop_tables():
-    """
-    Drops all tables from the database.
-
-    Returns:
-        bool: True if the tables are dropped, False otherwise.
-    """
-    try:
-        # Drop all tables from the database
-        with app.app_context():
-            db.drop_all()
-        return True
-    except Exception as e:
-        print(f"Error dropping tables: {e}")
-        return False
-
-def check_or_load_data():
-    # Check if the database file exists
-    if os.path.exists('app.db'):
-        # Make sure the tables are properly formatted
-        if not are_tables_formatted():
-            # Drop existing tables
-            drop_tables()
+    # This function is used to load the Netflix content data from a CSV file into the database.
+    def load_netflix_data(self):
+        """
+        Loads the Netflix content data from a CSV file into the database.
+        Returns:
+            dict: A dictionary containing the Netflix content data in JSON format.
+        """
+        try:
+            # Read data from CSV file
+            data = self.read_data_from_csv(self.filename)
             
-            # Create new tables
-            with app.app_context():
-                db.create_all()
-            
-            # Read data from 'netflix_ss.csv' file
-            data = read_data_from_csv('netflix_ss.csv')
+            # Clean the Netflix data
+            cleaned_data = self.clean_netflix_data(data)
             
             # Insert data into the database
-            asyncio.run(load_dataframe_to_sqlite(data, 'app.db', 'netflix_content'))
-    else: 
-        # Read data from 'netflix_ss.csv' file
-        data = read_data_from_csv('netflix_ss.csv')
-        # Create the database and tables
-        with app.app_context():
-            db.create_all()
-        
-        # Insert data into the database
-        asyncio.run(load_dataframe_to_sqlite(data, 'app.db', 'netflix_content'))
-        
+            with db.session.begin():
+                for row in cleaned_data.itertuples(index=False):
+                    netflix_content = NetflixContent(*row)
+                    db.session.add(netflix_content)
+            
+                    # Commit the changes
+                    db.session.commit()
+            
+            return {"message": "Netflix content data loaded successfully."}
+        except Exception as e:
+            return {"error": f"Error loading Netflix content data: {e}"}
+    
+    
+    def load_data(self):
+        # Read in the CSV file
+        df = pd.read_csv(self.filename)
+
+        # Clean the Netflix data
+        df = self.clean_netflix_data(df)
+
+        # Load the dataframe into the database
+        for _, row in df.iterrows():
+            existing_content = self.tables[0].query.filter_by(show_id=row['show_id']).first()
+            if existing_content is None:
+                netflix_content = self.tables[0](
+                    show_id=row['show_id'],
+                    type=row['type'],
+                    title=row['title'],
+                    director=row['director'],
+                    cast=row['cast'],
+                    country=row['country'],
+                    release_year=row['release_year'],
+                    rating=row['rating'],
+                    runtime=row['runtime'],
+                    time_denomination=row['time_denomination'],
+                    listed_in=row['listed_in'],
+                    description=row['description']
+                )
+                db.session.add(netflix_content)
+                db.session.commit()
+
+    
+    def query_all(self, index: int=None):
+        """
+        Retrieves all objects from the database.
+
+        Returns:
+            list: A list of objects.
+        """
+        target_table = self.tables[index] if index is not None else None
+        return target_table.query.all()
+    
+    def query_by_id(self, id: int):
+        """
+        Retrieves an object from the database by its ID.
+
+        Args:
+            id (int): The ID of the object.
+
+        Returns:
+            object: The object with the specified ID.
+        """
+        return self.tables.query.get(id)
+    
+    def query_by_attribute(self, attribute: str, value: str):
+        """
+        Retrieves an object from the database by its attribute.
+
+        Args:
+            attribute (str): The attribute of the object.
+            value (str): The value of the attribute.
+
+        Returns:
+            object: The object with the specified attribute.
+        """
+        return self.tables.query.filter(getattr(self.tables, attribute) == value).first()
+    
+    def query_by_attributes(self, attributes: dict):
+        """
+        Retrieves an object from the database by its attributes.
+
+        Args:
+            attributes (dict): The attributes of the object.
+
+        Returns:
+            object: The object with the specified attributes.
+        """
+        return self.tables.query.filter_by(**attributes).first()
+    
+    def query_by_attributes_all(self, attributes: dict):
+        """
+        Retrieves all objects from the database by their attributes.
+
+        Args:
+            attributes (dict): The attributes of the objects.
+
+        Returns:
+            list: A list of objects with the specified attributes.
+        """
+        return self.tables.query.filter_by(**attributes).all()
+    
+    def query_by_attributes_like(self, attributes: dict):
+        """
+        Retrieves all objects from the database by their attributes.
+
+        Args:
+            attributes (dict): The attributes of the objects.
+
+        Returns:
+            list: A list of objects with the specified attributes.
+        """
+        return self.tables.query.filter_by(**attributes).all()
+    

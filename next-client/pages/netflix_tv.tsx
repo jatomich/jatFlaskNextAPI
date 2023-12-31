@@ -1,4 +1,4 @@
-// Description: This page will fetch data from the API endpoint '/netflix' and display it on the page.
+// Description: This page will fetch data from the API endpoint '/netflix/tv'
 // Author: Andrew Tomich
 
 import React, { useEffect, useState } from "react";
@@ -13,14 +13,14 @@ import "../types/NetflixContent";
  * Renders the api page component.
  * Fetches data from the API and displays a loading message until the data is fetched.
  */
-function Netflix() {
+function NetflixTv() {
 
   const [data, setData] = useState<NetflixContent[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try{
-        const res = await axiosInstance.get("/netflix");
+        const res = await axiosInstance.get("/netflix/tv");
         setData(res.data.data);
        } catch (err) {
         console.error(err);
@@ -33,7 +33,7 @@ function Netflix() {
   return (
     // map the data to a list of JSX elements with the title and description
     <div>
-      <h1>Netflix</h1>
+      <h1>Netflix TV Shows</h1>
       {data && data.map((item, index) => (
         <Container key={index}>
           <Card>
@@ -46,7 +46,7 @@ function Netflix() {
       )
       )}
     </div>
-  );
-}
+  )
+};
 
-export default Netflix;
+export default NetflixTv;

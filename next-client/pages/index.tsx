@@ -17,6 +17,10 @@ const Home: React.FC = () => {
       <Link href="/netflix">
         <p>Go to Netflix page</p>
       </Link>
+      <hr />
+      <Link href="/netflix_movies">
+        <p>Go to Netflix Movies page</p>
+      </Link>
     </div>
   );
 };
