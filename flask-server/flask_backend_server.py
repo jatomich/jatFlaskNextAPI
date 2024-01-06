@@ -1,12 +1,10 @@
 # Description: Local executable script to define a shell context and run the Flask server.
 # Author: Andrew Tomich
 
-from flask_cors import CORS
 from app import create_app
 from app.models import db, NetflixContent
 
 app = create_app()
-CORS(app)
 
 @app.shell_context_processor
 def make_shell_context():
