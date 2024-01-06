@@ -1,9 +1,10 @@
 # Description: The view functions (along with any helper functions) for the Flask server.
 # Author: Andrew Tomich
 
+from datetime import datetime
 from flask import jsonify, url_for, current_app as app
 import pandas as pd
-from .models import db
+from .models import db, NetflixContent
 
 def clean_netflix_data(df: pd.DataFrame):
     """
@@ -59,58 +60,6 @@ def health_check():
     })
 
 
-# class NetflixType(Enum):
-#     """
-#     An enumeration of the different types of Netflix media.
-#     """
-#     movie = 'movie'
-#     tv = 'tv'
-
-# @app.route('/api/netflix/<string:type>', methods=['GET'])
-# def get_netflix_movies(type):
-#     """
-#     Retrieves a list of Netflix movies from a CSV file and returns them as a JSON response.
-#         Step 0: Read in the CSV file
-#         Step 1: Filter the dataframe to only include movies
-#         Step 2: Drop all 'NaN' values, sort the dataframe by title and reset the index
-#         Step 3: Remove 's' character from start of 'show_id' column and convert to integer
-#         Step 4: Return the JSON response
-#     Returns:
-#         dict: A dictionary containing the movie data in JSON format.
-#     """
-    # Check if the specified type is valid
-        # if type and type is not None:
-        #     if type not in [nt.value for nt in NetflixType.__iter__()]:
-        #         print([nt.value for nt in NetflixType.__iter__()])
-        #         raise ValueError(f'Invalid Netflix type: {type}')
-
-
-#     # Filter the dataframe to only include the specified type
-#     filtered_df = app.df[app.df['type'] == type.capitalize()]
-
-#     # Return the JSON response
-#     return jsonify({
-#         'data': app.df.to_dict(orient='records')
-#     })
-
-
-# @app.route('/api/netflix', methods=['GET'])
-# def get_netflix_content():
-#     """
-#     Retrieves a list of Netflix content from the database and returns them as a JSON response.
-#     Args:
-#         type (str): The type of Netflix content to retrieve.
-#     Returns:
-#         dict: A dictionary containing the Netflix content data in JSON format.
-#     """
-#     print(NetflixContent.query)
-#     # Retrieve the Netflix content from the database by querying the db object
-#     return
-#     # Return the JSON response
-#     return jsonify({
-#         'data': [i.to_dict() for i in netflix_content]
-#     })
-
 @app.route('/netflix', methods=['GET'])
 def load_database():
     """
@@ -124,14 +73,33 @@ def load_database():
     # Clean the Netflix data
     df = clean_netflix_data(df)
 
-    # Load the dataframe into the database
-    df.to_sql('netflix_content', db.engine, if_exists='replace', index=False)
+    try:
+        # Check if the database is empty
+        if not NetflixContent.query:
+            # Load the dataframe into the database
+            for tup in df.itertuples():
+                db.session.add(NetflixContent(
+                    show_id=tup.show_id,
+                    type=tup.type,
+                    title=tup.title,
+                    director=tup.director,
+                    cast=tup.cast,
+                    country=tup.country,
+                    release_year=tup.release_year,
+                    rating=tup.rating,
+                    listed_in=tup.listed_in,
+                    description=tup.description,
+                    created_at=datetime.now(),
+                    updated_at=datetime.now()
+                ))
+                db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({
+            'data': 'Error'
+        })
 
-    # Return the JSON response
     return jsonify({
         'data': df.to_dict(orient='records')
     })
 
-
-
-    
