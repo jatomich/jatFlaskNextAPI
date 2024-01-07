@@ -1,11 +1,18 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from json import JSONEncoder
 
 db = SQLAlchemy()
 
 
 # This class is used to define the NetflixContent table in the database.
 class NetflixContent(db.Model):
+    # Override the default JSONEncoder class to handle serialization of NetflixContent objects
+    class NetflixContentEncoder(JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, NetflixContent):
+                return obj.__dict__
+            return super().default(obj)
     """
     Represents a Netflix content item.
 
