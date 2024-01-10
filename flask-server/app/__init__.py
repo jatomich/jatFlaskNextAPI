@@ -17,6 +17,7 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     cors.init_app(app)
     db.init_app(app)
+    cors.init_app(app)
 
     with app.app_context():
         db.create_all()
