@@ -14,5 +14,5 @@ class Config(object):
     FLASK_ENV='development' if TESTING else os.environ.get('FLASK_ENV', 'production')
     FLASK_DEBUG=0 if FLASK_ENV == 'production' else 1
     FLASK_APP=os.environ.get('FLASK_APP', 'app.py')
-    CORS_ORIGINS='http://localhost:3000'
-    CORS_ALLOW_HEADERS='Access-Control-Allow-Origin, Content-Type, Authorization'
+    CORS_ORIGINS=['*']
+    CORS_ALLOW_HEADERS=['Access-Control-Allow-Origin', 'Content-Type', 'Authorization']
