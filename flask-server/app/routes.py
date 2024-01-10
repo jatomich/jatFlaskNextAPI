@@ -61,9 +61,11 @@ def health_check():
 
 
 @app.route('/netflix', methods=['GET'])
-def load_database():
+def get_netflix_content():
     """
-    Loads the Netflix content data from a CSV file into the database.
+    Retrieves a list of Netflix content from the database and returns them as a JSON response.
+    Args:
+        type (str): The type of Netflix content to retrieve.
     Returns:
         dict: A dictionary containing the Netflix content data in JSON format.
     """
