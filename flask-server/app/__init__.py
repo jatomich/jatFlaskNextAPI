@@ -11,8 +11,8 @@ cors = CORS()
 def create_app(config_class=Config):
     app = Flask(__name__,
                 # static_url_path="/jatFlaskNextAPI/flask-server/app/static",
-                # static_url_path='/home/at/SOURCE/jatFlaskNextAPI/flask-server/app/static',
-                # static_folder='/app/static'
+                static_url_path='/home/at/SOURCE/jatFlaskNextAPI/flask-server/app/static',
+                static_folder='/app/static'
     ) 
     app.config.from_object(config_class)
     cors.init_app(app)
@@ -20,6 +20,6 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
-        from . import routes
+        from . import routes, models
 
     return app

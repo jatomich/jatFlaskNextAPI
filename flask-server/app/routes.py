@@ -2,7 +2,7 @@
 # Author: Andrew Tomich
 
 from datetime import datetime
-from flask import jsonify, current_app as app
+from flask import jsonify, url_for, current_app as app
 import pandas as pd
 from .models import db, NetflixContent
 
@@ -68,8 +68,8 @@ def load_database():
         dict: A dictionary containing the Netflix content data in JSON format.
     """
     # Read in the CSV file
-    # df = pd.read_csv(url_for('static', filename='netflix_ss.csv'))
-    df = pd.read_csv('C:/Users/jandr/CODE/python/jatFlaskNextAPI/flask-server/app/static/netflix_ss.csv')
+    df = pd.read_csv(url_for('static', filename='netflix_ss.csv'))
+    # df = pd.read_csv('C:/Users/jandr/CODE/python/jatFlaskNextAPI/flask-server/app/static/netflix_ss.csv')
 
 
     # Clean the Netflix data
