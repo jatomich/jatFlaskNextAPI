@@ -7,6 +7,7 @@ import axiosInstance from "../utils/axios";
 import Container from "react-bootstrap/Container";
 import Card from "react-bootstrap/Card";
 
+import style from "./netflix.module.css";
 import "../types/NetflixContent";
 
 /**
@@ -36,8 +37,8 @@ function NetflixTv() {
       <h1>Netflix TV Shows</h1>
       {data && data.map((item, index) => (
         <Container key={index}>
-          <Card>
-            <Card.Body>
+          <Card className={style.container}>
+            <Card.Body className={style.netflixContent}>
               <Card.Title>{item.title}</Card.Title>
               <Card.Text>{item.description}</Card.Text>
             </Card.Body>

@@ -7,12 +7,9 @@ import axiosInstance from "../utils/axios";
 import Container from "react-bootstrap/Container";
 import Card from "react-bootstrap/Card";
 
-<<<<<<< HEAD
 import style from "./netflix.module.css";
-=======
-import "../types/NetflixContent";
->>>>>>> 21ca090 (Move loading of database to app factory. Create DataManager class to provide flexible interface for database functions. Addresses issue #24.)
 
+import "../types/NetflixContent";
 /**
  * Renders the api page component.
  * Fetches data from the API and displays a loading message until the data is fetched.
