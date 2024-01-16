@@ -90,10 +90,15 @@ def get_netflix_content():
             country=tup.country,
             release_year=tup.release_year,
             rating=tup.rating,
+            runtime=tup.runtime,
+            time_denomination=tup.time_denomination,
             listed_in=tup.listed_in,
             description=tup.description,
-            created_at=datetime.now(),
-            updated_at=datetime.now()
+            year_added=tup.year_added,
+            month_added=tup.month_added,
+            day_added=tup.day_added
+            #created_at=datetime.now(),
+            #updated_at=datetime.now()
         ))
     db.session.commit()
 

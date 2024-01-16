@@ -50,6 +50,9 @@ class NetflixContent(db.Model):
     year_added = db.Column(db.Integer)
     month_added = db.Column(db.String(10))
     day_added = db.Column(db.String(10))
+    created_at = db.Column(db.DateTime())
+    updated_at = db.Column(db.DateTime())
+
 
     def __init__(
             self,
@@ -67,7 +70,9 @@ class NetflixContent(db.Model):
             description,
             year_added,
             month_added,
-            day_added
+            day_added,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
             ):
         """
         Args:
@@ -102,8 +107,8 @@ class NetflixContent(db.Model):
         self.year_added = year_added
         self.month_added = month_added
         self.day_added = day_added
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+        self.created_at = created_at
+        self.updated_at = updated_at
 
     def __repr__(self):
         """
