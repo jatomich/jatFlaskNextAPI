@@ -50,7 +50,7 @@ def clean_netflix_data(df: pd.DataFrame):
     return df
 
 
-@app.route('/api/health', methods=['GET'])
+@app.route('/netflix/health', methods=['GET'])
 def health_check():
     """
     Returns a JSON response with a message.
@@ -69,33 +69,33 @@ def get_netflix_content():
     Returns:
         dict: A dictionary containing the Netflix content data in JSON format.
     """
-    try:
-        # If the database is empty, load the dataframe into the database
-        if not NetflixContent.query[0] or NetflixContent.query[0] is None:
-            print("Not Loaded")
-            raise IndexError
-    except IndexError:
-        # Read in the CSV file
-        df = pd.read_csv(url_for('static', filename='netflix_ss.csv'))
-        # df = pd.read_csv('C:/Users/jandr/CODE/python/jatFlaskNextAPI/flask-server/app/static/netflix_ss.csv')
-        # Clean the Netflix data
-        df = clean_netflix_data(df)
-        for tup in df.itertuples():
-            db.session.add(NetflixContent(
-                show_id=tup.show_id,
-                type=tup.type,
-                title=tup.title,
-                director=tup.director,
-                cast=tup.cast,
-                country=tup.country,
-                release_year=tup.release_year,
-                rating=tup.rating,
-                listed_in=tup.listed_in,
-                description=tup.description,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            ))
-        db.session.commit()
+    # try:
+    #     # If the database is empty, load the dataframe into the database
+    #     if not NetflixContent.query[0] or NetflixContent.query[0] is None:
+    #         print("Not Loaded")
+    #         raise IndexError
+    # except IndexError:
+    #     # Read in the CSV file
+    df = pd.read_csv(url_for('static', filename='netflix_ss.csv'))
+    # df = pd.read_csv('C:/Users/jandr/CODE/python/jatFlaskNextAPI/flask-server/app/static/netflix_ss.csv')
+    # Clean the Netflix data
+    df = clean_netflix_data(df)
+    for tup in df.itertuples():
+        db.session.add(NetflixContent(
+            show_id=tup.show_id,
+            type=tup.type,
+            title=tup.title,
+            director=tup.director,
+            cast=tup.cast,
+            country=tup.country,
+            release_year=tup.release_year,
+            rating=tup.rating,
+            listed_in=tup.listed_in,
+            description=tup.description,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        ))
+    db.session.commit()
 
     netflix_content = [nc.__dict__ for nc in NetflixContent.query.all()]
     for nc in netflix_content:
