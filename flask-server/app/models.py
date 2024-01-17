@@ -1,21 +1,24 @@
+import os
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from flask_mysqldb import MySQL
+
+connection_string = f"Driver={'ODBC Driver 18 for SQL Server'}; \
+    Server=tcp:jatdev.database.windows.net,1433; \
+        Database=flaskapi; \
+            Uid=jandr; \
+                Pwd=f'{os.environ.get('DB_PASSWORD', '')}'; \
+                    Encrypt=yes; \
+                        TrustServerCertificate=no; \
+                            Connection Timeout=30;"
 
 db = SQLAlchemy()
-mysql = MySQL()
 
 
 # This class is used to define the NetflixContent table in the database.
 class NetflixContent(db.Model):
-    # Override the default JSONEncoder class to handle serialization of NetflixContent objects
-    # class NetflixContentEncoder(JSONEncoder):
-    #     def default(self, obj):
-    #         if isinstance(obj, NetflixContent):
-    #             return obj.__dict__
-    #         return super().default(obj)
-    # Represents a Netflix content item.
     """
+    Represents a Netflix content item.
+
     Attributes:
         id (int): The unique identifier of the content.
         show_id (int): The unique identifier of the show.
@@ -53,7 +56,7 @@ class NetflixContent(db.Model):
     created_at = db.Column(db.DateTime())
     updated_at = db.Column(db.DateTime())
 
-
+    
     def __init__(
             self,
             show_id,
