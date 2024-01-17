@@ -4,7 +4,7 @@
 from flask import Flask
 from config import Config
 from flask_cors import CORS
-from .models import db, mysql
+from .models import db
 
 cors = CORS()
 
@@ -17,7 +17,6 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     cors.init_app(app)
     db.init_app(app)
-    mysql.init_app(app)
     cors.init_app(app)
 
     with app.app_context():
