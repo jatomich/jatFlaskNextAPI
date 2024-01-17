@@ -15,12 +15,13 @@ def create_app(config_class=Config):
                 static_folder='/app/static'
     ) 
     app.config.from_object(config_class)
-    cors.init_app(app)
     db.init_app(app)
     cors.init_app(app)
 
     with app.app_context():
-        # db.create_all()
+        db.create_all()
         from . import routes, models
+
+    
 
     return app

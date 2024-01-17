@@ -1,15 +1,6 @@
-import os
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
-connection_string = f"Driver={'ODBC Driver 18 for SQL Server'}; \
-    Server=tcp:jatdev.database.windows.net,1433; \
-        Database=flaskapi; \
-            Uid=jandr; \
-                Pwd=f'{os.environ.get('DB_PASSWORD', '')}'; \
-                    Encrypt=yes; \
-                        TrustServerCertificate=no; \
-                            Connection Timeout=30;"
 
 db = SQLAlchemy()
 
