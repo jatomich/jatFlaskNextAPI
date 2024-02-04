@@ -1,0 +1,21 @@
+type SampleData = {
+    NameStyle: boolean,
+    Title: string,
+    FirstName: string,
+    MiddleName: string,
+    LastName: string,
+    Suffix: string,
+    CompanyName: string,
+    SalesPerson: string,
+    EmailAddress: string,
+    Phone: string,
+    PasswordHash: string,
+    PasswordSalt: string,
+    AddressType: string,
+    AddressLine1: string,
+    AddressLine2: string,
+    City: string,
+    StateProvince: string,
+    CountryRegion: string,
+    PostalCode: string
+}

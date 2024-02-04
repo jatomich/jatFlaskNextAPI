@@ -135,8 +135,8 @@ def get_netflix_tv():
         }
     )
 
-@app.route('/sampleData', methods=['GET'])
-def sample_data():
+@app.route('/sample', methods=['GET'])
+def sample():
 
     server = os.getenv('DB_SERVER', None)
     protocol = os.getenv('DB_SERVER_PROTOCOL', None)
@@ -166,11 +166,11 @@ def sample_data():
 
     dataset = cursor.fetchall()
     df = pd.DataFrame.from_records(dataset, columns=columns)
-    print(df)
-
-    df.to_csv('C:/Users/jandr/Downloads/sampleData.csv', index=False)
-
-    return 'Connection Successful!', 200
+    df.drop(columns=['CustomerID', 'AddressID', 'ModifiedDate', 'rowguid'], inplace=True)
+    print(df.columns)
+    data = df.to_json(orient='records')
+    # return 'Connection Successful!', 200
+    return data
 
     # if len(columns) != len(dataset[0]):
     #     print(f"Warning: Number of columns in dataset ({len(dataset[0])}) does not match number of columns names ({len(columns)}).")
