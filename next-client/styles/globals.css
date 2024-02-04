@@ -2,3 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+hr {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-top-width: 1px;
+  border-top-color: var(--color-border);
+}
