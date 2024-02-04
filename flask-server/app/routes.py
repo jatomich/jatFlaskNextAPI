@@ -3,7 +3,8 @@
 
 import os
 import pyodbc
-from datetime import datetime
+import numpy as np
+# from datetime import datetime
 from flask import jsonify, url_for, current_app as app
 import pandas as pd
 from .models import db, NetflixContent
@@ -134,47 +135,72 @@ def get_netflix_tv():
         }
     )
 
-@app.route('/load_data', methods=['GET'])
-def load_data():
-    import pandas as pd
-
-    df = pd.read_csv(url_for('static', filename='netflix_ss.csv'))
-    # Clean the Netflix data
-    df = clean_netflix_data(df)
+@app.route('/sampleData', methods=['GET'])
+def sample_data():
 
     server = os.getenv('DB_SERVER', None)
+    protocol = os.getenv('DB_SERVER_PROTOCOL', None)
+    port = os.getenv('DB_PORT', None)
     database = os.getenv('DB_NAME', None)
     username = os.getenv('DB_USER', None)
     password = os.getenv('DB_PASSWORD', None)
     driver = '{ODBC Driver 18 for SQL Server}'
 
-    cnxn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password)
+    cnnxnString = f'Driver={driver};Server={protocol}:{server},{port};Database={database};Uid={username};Pwd={password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;'
+    print(cnnxnString)
+
+    cnxn = pyodbc.connect(cnnxnString)
     cursor = cnxn.cursor()
+    sql = '''
+    SELECT *
+    FROM SalesLT.Customer c
+    JOIN SalesLT.CustomerAddress ca
+    ON c.CustomerID = ca.CustomerID
+    JOIN SalesLT.Address a
+    ON ca.AddressID = a.AddressID
+    WHERE ca.AddressType = 'Main Office';
+    '''
+    cursor.execute(sql)
+    columns = [column[0] for column in cursor.description]
+    print(columns)
 
-    for index, row in df.iterrows():
-        netflix_content = NetflixContent(
-            show_id=row['show_id'],
-            type=row['type'],
-            title=row['title'],
-            director=row['director'],
-            cast=row['cast'],
-            country=row['country'],
-            release_year=row['release_year'],
-            rating=row['rating'],
-            runtime=row['runtime'],
-            time_denomination=row['time_denomination'],
-            listed_in=row['listed_in'],
-            description=row['description'],
-            year_added=row['year_added'],
-            month_added=row['month_added'],
-            day_added=row['day_added'],
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        cursor.execute(f"INSERT INTO NetflixContent (show_id, type, title, director, cast, country, release_year, rating, runtime, time_denomination, listed_in, description, year_added, month_added, day_added, created_at, updated_at) VALUES ({netflix_content.show_id}, '{netflix_content.type}', '{netflix_content.title}', '{netflix_content.director}', '{netflix_content.cast}', '{netflix_content.country}', {netflix_content.release_year}, '{netflix_content.rating}', {netflix_content.runtime}, '{netflix_content.time_denomination}', '{netflix_content.listed_in}', '{netflix_content.description}', {netflix_content.year_added}, '{netflix_content.month_added}', '{netflix_content.day_added}', '{netflix_content.created_at}', '{netflix_content.updated_at}')")
-    cnxn.commit()
+    dataset = cursor.fetchall()
+    df = pd.DataFrame.from_records(dataset, columns=columns)
+    print(df)
 
-    return 'Data loaded successfully!', 200
+    df.to_csv('C:/Users/jandr/Downloads/sampleData.csv', index=False)
+
+    return 'Connection Successful!', 200
+
+    # if len(columns) != len(dataset[0]):
+    #     print(f"Warning: Number of columns in dataset ({len(dataset[0])}) does not match number of columns names ({len(columns)}).")
+
+    # df = pd.DataFrame(dataset, columns=columns)
+    # print(df)
+
+    # for index, row in df.iterrows():
+    #     netflix_content = NetflixContent(
+    #         show_id=row['show_id'],
+    #         type=row['type'],
+    #         title=row['title'],
+    #         director=row['director'],
+    #         cast=row['cast'],
+    #         country=row['country'],
+    #         release_year=row['release_year'],
+    #         rating=row['rating'],
+    #         runtime=row['runtime'],
+    #         time_denomination=row['time_denomination'],
+    #         listed_in=row['listed_in'],
+    #         description=row['description'],
+    #         year_added=row['year_added'],
+    #         month_added=row['month_added'],
+    #         day_added=row['day_added'],
+    #         created_at=datetime.now(),
+    #         updated_at=datetime.now()
+    #     )
+    #     cursor.execute(f"INSERT INTO NetflixContent (show_id, type, title, director, cast, country, release_year, rating, runtime, time_denomination, listed_in, description, year_added, month_added, day_added, created_at, updated_at) VALUES ({netflix_content.show_id}, '{netflix_content.type}', '{netflix_content.title}', '{netflix_content.director}', '{netflix_content.cast}', '{netflix_content.country}', {netflix_content.release_year}, '{netflix_content.rating}', {netflix_content.runtime}, '{netflix_content.time_denomination}', '{netflix_content.listed_in}', '{netflix_content.description}', {netflix_content.year_added}, '{netflix_content.month_added}', '{netflix_content.day_added}', '{netflix_content.created_at}', '{netflix_content.updated_at}')")
+    # cnxn.commit()
+
 
 
 # @app.route('/netflix_id/<int:show_id>', methods=['GET', 'POST'])
